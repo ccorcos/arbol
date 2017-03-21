@@ -1,31 +1,57 @@
 import React from "react";
 import { css } from "glamor";
 
-class Normal {
-  constructor(nextId, rects) {
+class Normal {}
+
+class Parent {
+  constructor(nextId, rects, state) {
     this.nextId = nextId;
     this.rects = rects;
+    this.state = state;
   }
   draw(point) {
-    return new Draw(point, point, this.addRect);
+    return new Parent(
+      this.nextId,
+      this.rects,
+      new Draw(point, point, this.addRect)
+    );
   }
   addRect = rect => {
-    return new Normal(this.nextId + 1, {
-      ...this.rects,
-      [this.nextId]: rect
-    });
+    return new Parent(
+      this.nextId + 1,
+      {
+        ...this.rects,
+        [this.nextId]: rect
+      },
+      new Normal()
+    );
   };
   drag(point, id) {
     const rect = this.rects[id];
-    return new Drag(point, point, rect, this.moveRect);
+    return new Parent(
+      this.nextId,
+      this.rects,
+      new Drag(point, point, rect, this.moveRect)
+    );
   }
   moveRect = id =>
     rect => {
-      return new Normal(this.nextId, {
-        ...this.rects,
-        [id]: rect
-      });
+      return new Parent(
+        this.nextId,
+        {
+          ...this.rects,
+          [id]: rect
+        },
+        new Normal()
+      );
     };
+  move(p2) {
+    return new Parent(
+      this.nextId,
+      this.rects,
+      new Draw(this.state.p1, p2, this.state.done)
+    );
+  }
 }
 
 const pointsToRect = (p1, p2) => ({
@@ -40,9 +66,6 @@ class Draw {
     this.p1 = p1;
     this.p2 = p2;
     this.done = done;
-  }
-  move(p2) {
-    return new Draw(this.p1, p2, this.done);
   }
   rect() {
     return pointsToRect(this.p1, this.p2);
@@ -89,7 +112,7 @@ const canvas = css({
 
 class Canvas extends React.PureComponent {
   state = {
-    fsm: new Normal(0, {})
+    fsm: new Parent(0, {}, new Normal())
   };
 
   onMouseDown = e => {
@@ -106,13 +129,13 @@ class Canvas extends React.PureComponent {
 
   onMouseUp = e => {
     this.setState({
-      fsm: this.state.fsm.up({ x: e.pageX, y: e.pageY })
+      fsm: this.state.fsm.state.up({ x: e.pageX, y: e.pageY })
     });
   };
 
   mapRects = fn => {
-    return Object.keys(this.state.rects).map(key => {
-      return fn(this.state.rects[key], key);
+    return Object.keys(this.state.fsm.rects).map(key => {
+      return fn(this.state.fsm.rects[key], key);
     });
   };
 
@@ -121,16 +144,18 @@ class Canvas extends React.PureComponent {
       <div
         className={canvas}
         onMouseDown={
-          this.state.fsm instanceof Normal ? this.onMouseDown : undefined
+          this.state.fsm.state instanceof Normal ? this.onMouseDown : undefined
         }
         onMouseMove={
-          this.state.fsm instanceof Draw ? this.onMouseMove : undefined
+          this.state.fsm.state instanceof Draw ? this.onMouseMove : undefined
         }
-        onMouseUp={this.state.fsm instanceof Draw ? this.onMouseUp : undefined}
+        onMouseUp={
+          this.state.fsm.state instanceof Draw ? this.onMouseUp : undefined
+        }
       >
-
-        {this.state.fsm instanceof Draw &&
-          <Rect position={this.state.fsm.rect()} />}
+        {this.mapRects((rect, key) => <Rect key={key} position={rect} />)}
+        {this.state.fsm.state instanceof Draw &&
+          <Rect position={this.state.fsm.state.rect()} />}
       </div>
     );
   }
