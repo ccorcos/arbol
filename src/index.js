@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { css } from "glamor";
+import App from "./thinking";
 import keymaster from "keymaster";
 
 const canvas = css({
@@ -234,4 +235,4 @@ class Index extends React.PureComponent {
 const root = document.createElement("div");
 document.body.appendChild(root);
 
-ReactDOM.render(<Index />, root);
+ReactDOM.render(<App />, root);
