@@ -2,8 +2,6 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { css } from "glamor";
 import keymaster from "keymaster";
-import App from "./reactive";
-import "./reactive";
 
 const canvas = css({
   position: "absolute",
@@ -27,27 +25,66 @@ class Canvas extends React.PureComponent {
     super(props);
   }
 
-  mousedown = event => {
+  onMouseDown = event => {
     const point = {
       x: event.pageX,
       y: event.pageY
     };
     this.setState({
-      state: "mousedown",
+      state: "draw",
       start: point,
       current: point,
       selected: this.state.nextId
     });
   };
 
-  mousemove = event => {
-    if (this.state.state === "mousedown") {
+  onRectMouseDown = (id, event) => {
+    if (this.state.state === "normal") {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const point = {
+        x: event.pageX,
+        y: event.pageY
+      };
+      this.setState({
+        state: "move",
+        start: point,
+        selected: id
+      });
+    }
+  };
+
+  onMouseMove = event => {
+    if (this.state.state === "draw") {
       const point = {
         x: event.pageX,
         y: event.pageY
       };
       this.setState({
         current: point
+      });
+    }
+  };
+
+  onRectMouseMove = (id, event) => {
+    if (this.state.state === "move") {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const point = {
+        x: event.pageX,
+        y: event.pageY
+      };
+      console.log(this.state.rects[id].top, point.y, this.state.start.y);
+      this.setState({
+        rects: {
+          ...this.state.rects,
+          [id]: {
+            top: this.state.rects[id].top + point.y - this.state.start.y,
+            left: this.state.rects[id].left + point.x - this.state.start.x
+          }
+        }
       });
     }
   };
@@ -61,8 +98,8 @@ class Canvas extends React.PureComponent {
     };
   };
 
-  mouseup = event => {
-    if (this.state.state === "mousedown") {
+  onMouseUp = event => {
+    if (this.state.state === "draw") {
       const point = {
         x: event.pageX,
         y: event.pageY
@@ -80,21 +117,23 @@ class Canvas extends React.PureComponent {
     }
   };
 
+  onRectMouseUp = (id, event) => {
+    if (this.state.state === "move") {
+      event.preventDefault();
+      event.stopPropagation();
+
+      this.onRectMouseMove(id, event);
+      this.setState({
+        state: "normal",
+        start: undefined
+      });
+    }
+  };
+
   mapRects = fn => {
     return Object.keys(this.state.rects).map(key => {
       return fn(this.state.rects[key], key);
     });
-  };
-
-  renderRect = (rect, key) => {
-    return (
-      <div
-        className={box}
-        key={key}
-        onClick
-        style={{ position: "absolute", ...rect }}
-      />
-    );
   };
 
   onSelect = id => {
@@ -107,9 +146,9 @@ class Canvas extends React.PureComponent {
     return (
       <div
         className={canvas}
-        onMouseDown={this.mousedown}
-        onMouseMove={this.mousemove}
-        onMouseUp={this.mouseup}
+        onMouseDown={this.onMouseDown}
+        onMouseMove={this.onMouseMove}
+        onMouseUp={this.onMouseUp}
       >
         {this.mapRects((pos, id) => {
           return (
@@ -118,16 +157,20 @@ class Canvas extends React.PureComponent {
               id={id}
               position={pos}
               selected={this.state.selected.toString() === id}
-              onClick={this.onSelect}
+              onMouseDown={this.onRectMouseDown}
+              onMouseMove={this.onRectMouseMove}
+              onMouseUp={this.onRectMouseUp}
             />
           );
         })}
-        {this.state.state === "mousedown" &&
+        {this.state.state === "draw" &&
           <Rect
             id={this.state.nextId}
             position={this.position()}
             selected={this.state.selected === this.state.nextId}
-            onClick={this.onSelect}
+            onMouseDown={this.onRectMouseDown}
+            onMouseMove={this.onRectMouseMove}
+            onMouseUp={this.onRectMouseUp}
           />}
       </div>
     );
@@ -149,20 +192,24 @@ const selected = css({
 
 class Rect extends React.PureComponent {
   onMouseDown = event => {
-    event.preventDefault();
-    event.stopPropagation();
+    this.props.onMouseDown(this.props.id, event);
   };
 
-  onClick = event => {
-    this.props.onClick(this.props.id);
+  onMouseMove = event => {
+    this.props.onMouseMove(this.props.id, event);
+  };
+
+  onMouseUp = event => {
+    this.props.onMouseUp(this.props.id, event);
   };
 
   render() {
     return (
       <div
         className={css(rect, this.props.selected && selected)}
-        onClick={this.onClick}
         onMouseDown={this.onMouseDown}
+        onMouseMove={this.onMouseMove}
+        onMouseUp={this.onMouseUp}
         style={{ position: "absolute", ...this.props.position }}
       />
     );
@@ -187,4 +234,4 @@ class Index extends React.PureComponent {
 const root = document.createElement("div");
 document.body.appendChild(root);
 
-ReactDOM.render(<App />, root);
+ReactDOM.render(<Index />, root);
