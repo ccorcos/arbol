@@ -1,6 +1,12 @@
 import React from "react";
 import { css } from "glamor";
 
+// FIX.
+// - dragging with id...
+
+// TODO.
+// - select, move, resize, delete
+
 class Normal {}
 
 class Parent {
@@ -26,30 +32,27 @@ class Parent {
       new Normal()
     );
   };
-  drag(point, id) {
-    const rect = this.rects[id];
-    return new Parent(
-      this.nextId,
-      this.rects,
-      new Drag(point, point, rect, this.moveRect)
-    );
-  }
-  moveRect = id =>
-    rect => {
-      return new Parent(
-        this.nextId,
-        {
-          ...this.rects,
-          [id]: rect
-        },
-        new Normal()
-      );
-    };
   move(p2) {
     return new Parent(
       this.nextId,
       this.rects,
       new Draw(this.state.p1, p2, this.state.done)
+    );
+  }
+  drag(id, point) {
+    const rect = this.rects[id];
+    delete this.rects[id];
+    return new Parent(
+      this.nextId,
+      this.rects,
+      new Drag(point, point, rect, this.addRect)
+    );
+  }
+  dragging(p2) {
+    return new Parent(
+      this.nextId,
+      this.rects,
+      new Drag(this.state.p1, p2, this.state.pos, this.state.done)
     );
   }
 }
@@ -76,7 +79,7 @@ class Draw {
   }
 }
 
-const pointsToMovedRect = (p1, p2, rect) => ({
+const pointsToMovedRect = (rect, p1, p2) => ({
   top: rect.top + (p1.y - p2.y),
   left: rect.left + (p1.x - p2.x),
   width: rect.width,
@@ -84,21 +87,18 @@ const pointsToMovedRect = (p1, p2, rect) => ({
 });
 
 class Drag {
-  constructor(p1, p2, rect, done) {
+  constructor(p1, p2, pos, done) {
     this.p1 = p1;
     this.p2 = p2;
-    this.rect = rect;
+    this.pos = pos;
     this.done = done;
   }
-  move(p2) {
-    return new Drag(this.p1, p2, this.rect, this.done);
-  }
   rect() {
-    return pointsToMovedRect(this.rect, this.p1, this.p2);
+    return pointsToMovedRect(this.pos, this.p1, this.p2);
   }
   up(p2) {
-    const rect = pointsToMovedRect(this.rect, this.p1, p2);
-    return this.done(rect);
+    const pos = pointsToMovedRect(this.pos, this.p1, p2);
+    return this.done(pos);
   }
 }
 
@@ -116,21 +116,27 @@ class Canvas extends React.PureComponent {
   };
 
   onMouseDown = e => {
-    this.setState({
-      fsm: this.state.fsm.draw({ x: e.pageX, y: e.pageY })
-    });
+    if (this.state.fsm.state instanceof Normal) {
+      this.setState({
+        fsm: this.state.fsm.draw({ x: e.pageX, y: e.pageY })
+      });
+    }
   };
 
   onMouseMove = e => {
-    this.setState({
-      fsm: this.state.fsm.move({ x: e.pageX, y: e.pageY })
-    });
+    if (this.state.fsm.state instanceof Draw) {
+      this.setState({
+        fsm: this.state.fsm.move({ x: e.pageX, y: e.pageY })
+      });
+    }
   };
 
   onMouseUp = e => {
-    this.setState({
-      fsm: this.state.fsm.state.up({ x: e.pageX, y: e.pageY })
-    });
+    if (this.state.fsm.state instanceof Draw) {
+      this.setState({
+        fsm: this.state.fsm.state.up({ x: e.pageX, y: e.pageY })
+      });
+    }
   };
 
   mapRects = fn => {
@@ -139,23 +145,64 @@ class Canvas extends React.PureComponent {
     });
   };
 
+  onRectMouseDown = (id, e) => {
+    if (this.state.fsm.state instanceof Normal) {
+      debugger;
+      e.preventDefault();
+      e.stopPropagation();
+      this.setState({
+        fsm: this.state.fsm.drag(id, { x: e.pageX, y: e.pageY })
+      });
+    }
+  };
+
+  onRectMouseMove = (id, e) => {
+    if (this.state.fsm.state instanceof Drag) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.setState({
+        fsm: this.state.fsm.dragging({ x: e.pageX, y: e.pageY })
+      });
+    }
+  };
+
+  onRectMouseUp = (id, e) => {
+    if (this.state.fsm.state instanceof Drag) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.setState({
+        fsm: this.state.fsm.state.up({ x: e.pageX, y: e.pageY })
+      });
+    }
+  };
+
   render() {
+    console.log(this.state.fsm.state);
     return (
       <div
         className={canvas}
-        onMouseDown={
-          this.state.fsm.state instanceof Normal ? this.onMouseDown : undefined
-        }
-        onMouseMove={
-          this.state.fsm.state instanceof Draw ? this.onMouseMove : undefined
-        }
-        onMouseUp={
-          this.state.fsm.state instanceof Draw ? this.onMouseUp : undefined
-        }
+        onMouseDown={this.onMouseDown}
+        onMouseMove={this.onMouseMove}
+        onMouseUp={this.onMouseUp}
       >
-        {this.mapRects((rect, key) => <Rect key={key} position={rect} />)}
-        {this.state.fsm.state instanceof Draw &&
-          <Rect position={this.state.fsm.state.rect()} />}
+        {this.mapRects((rect, key) => (
+          <Rect
+            onMouseDown={this.onRectMouseDown}
+            onMouseMove={this.onRectMouseMove}
+            onMouseUp={this.onRectMouseUp}
+            key={key}
+            id={key}
+            position={rect}
+          />
+        ))}
+        {(this.state.fsm.state instanceof Draw ||
+          this.state.fsm.state instanceof Drag) &&
+          <Rect
+            onMouseDown={() => {}}
+            onMouseMove={() => {}}
+            onMouseUp={() => {}}
+            position={this.state.fsm.state.rect()}
+          />}
       </div>
     );
   }
@@ -170,10 +217,16 @@ const rect = css({
 });
 
 class Rect extends React.PureComponent {
+  onMouseDown = e => this.props.onMouseDown(this.props.id, e);
+  onMouseMove = e => this.props.onMouseMove(this.props.id, e);
+  onMouseUp = e => this.props.onMouseUp(this.props.id, e);
   render() {
     return (
       <div
         className={rect}
+        onMouseDown={this.onMouseDown}
+        onMouseMove={this.onMouseMove}
+        onMouseUp={this.onMouseUp}
         style={{ position: "absolute", ...this.props.position }}
       />
     );

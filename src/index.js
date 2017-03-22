@@ -235,4 +235,4 @@ class Index extends React.PureComponent {
 const root = document.createElement("div");
 document.body.appendChild(root);
 
-ReactDOM.render(<App />, root);
+ReactDOM.render(<Index />, root);
