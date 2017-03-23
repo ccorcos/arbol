@@ -36,7 +36,7 @@ const Counter = h("counter", {
     init: () => 0,
     actions: {
       inc: (state, event) => state + 1,
-      dec: (state, event) => state - props.decBy
+      dec: (state, event) => state - 1
     }
   },
   view: ({ state, actions }, children) =>
@@ -56,10 +56,10 @@ const Counter = h("counter", {
 const componentRootElement = new ComponentElement("");
 const componentRootVNode = patchComponent(componentRootElement, Counter);
 
-// debugger;
-// const viewRootElement = document.createElement("div");
-// document.body.appendChild(viewRootElement);
-// const viewRootVNode = patchView(viewRootElement, componentRootVNode.view);
+debugger;
+const viewRootElement = document.createElement("div");
+document.body.appendChild(viewRootElement);
+const viewRootVNode = patchView(viewRootElement, componentRootVNode.view);
 
 // const TwoCounters = h("TwoCounters", [
 //   thunk(Counter, { decBy: 2 }),

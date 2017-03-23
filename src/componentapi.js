@@ -53,7 +53,6 @@ const createComment = error;
 
 // function insertBefore(parentNode: Node, newNode: Node, referenceNode: Node | null): void
 function insertBefore(parentNode, newNode, referenceNode) {
-  debugger;
   parentNode.insertBefore(newNode, referenceNode);
 }
 
