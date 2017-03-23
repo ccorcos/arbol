@@ -135,13 +135,13 @@ class EventEmitter {
     delete this.subscribers[id];
   }
   emit(value) {
-    Object.keys(subscribers).forEach(fn => fn(value));
+    Object.keys(this.subscribers).forEach(key => this.subscribers[key](value));
   }
 }
 
 // initializes stuff thats shared by the whole component
 export const componentModule = {
-  create(vnode) {
+  create(emptyVNode, vnode) {
     // a `bag` is just some arguments that get passed to the effects functions
     vnode.bag = {};
     // a place to keep track of all the effect results
@@ -155,12 +155,12 @@ export const componentModule = {
 
 // stateful components
 export const statefulModule = {
-  create(vnode) {
+  create(emptyVNode, vnode) {
     if (vnode.data.stateful) {
       vnode.bag.state = vnode.data.stateful.init();
       vnode.bag.actions = {};
       Object.keys(vnode.data.stateful.actions || {}).forEach(key => {
-        vnode.bag.actions = (...args) => {
+        vnode.bag.actions[key] = (...args) => {
           vnode.bag.state = vnode.data.stateful.actions[key](
             vnode.bag.state,
             ...args
@@ -181,7 +181,7 @@ export const statefulModule = {
 
 export const effectModule = (effectName, patchEffect) => {
   return {
-    create(vnode) {
+    create(emptyVNode, vnode) {
       if (vnode.data[effectName]) {
         const childViews = (vnode.children || [])
           .map(vn => vn.effects[effectName]);

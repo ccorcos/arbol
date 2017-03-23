@@ -56,10 +56,12 @@ const Counter = h("counter", {
 const componentRootElement = new ComponentElement("");
 const componentRootVNode = patchComponent(componentRootElement, Counter);
 
-debugger;
 const viewRootElement = document.createElement("div");
 document.body.appendChild(viewRootElement);
-const viewRootVNode = patchView(viewRootElement, componentRootVNode.view);
+const viewRootVNode = patchView(
+  viewRootElement,
+  componentRootVNode.effects.view
+);
 
 // const TwoCounters = h("TwoCounters", [
 //   thunk(Counter, { decBy: 2 }),
