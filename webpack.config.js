@@ -25,21 +25,21 @@ module.exports = {
             options: {
               presets: ["react", "es2015", "stage-0"]
             }
+          }
+        ]
+      },
+      {
+        test: /\.tsx?$/,
+        exclude: /node_modules/,
+        use: [
+          {
+            loader: "babel-loader",
+            options: {
+              presets: ["react", ["es2015", { modules: false }], "stage-0"]
+            }
           },
           {
-            test: /\.tsx?$/,
-            exclude: /node_modules/,
-            use: [
-              {
-                loader: "babel-loader",
-                options: {
-                  presets: ["react", ["es2015", { modules: false }], "stage-0"]
-                }
-              },
-              {
-                loader: "ts-loader"
-              }
-            ]
+            loader: "ts-loader"
           }
         ]
       }

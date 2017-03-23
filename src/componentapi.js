@@ -1,10 +1,12 @@
 // HTMLElement and Node are very similar / related types:
 // http://stackoverflow.com/questions/9979172/difference-between-node-object-and-element-object
 
-class ComponentElement {
+export class ComponentElement {
   constructor(tagName) {
     this.tagName = tagName;
     this.children = [];
+    this.parentNode = null;
+    this.nextSibling = null;
   }
   insertBefore(newNode, referenceNode) {
     const i = this.children.indexOf(referenceNode);
@@ -51,6 +53,7 @@ const createComment = error;
 
 // function insertBefore(parentNode: Node, newNode: Node, referenceNode: Node | null): void
 function insertBefore(parentNode, newNode, referenceNode) {
+  debugger;
   parentNode.insertBefore(newNode, referenceNode);
 }
 
@@ -116,4 +119,86 @@ export default {
   isElement,
   isText,
   isComment
+};
+
+class EventEmitter {
+  constructor() {
+    this.id = 0;
+    this.subscribers = {};
+  }
+  subscribe(fn) {
+    const id = this.id;
+    this.subscribers[id] = fn;
+    this.id++;
+    return id;
+  }
+  stop(id) {
+    delete this.subscribers[id];
+  }
+  emit(value) {
+    Object.keys(subscribers).forEach(fn => fn(value));
+  }
+}
+
+// initializes stuff thats shared by the whole component
+export const componentModule = {
+  create(vnode) {
+    // a `bag` is just some arguments that get passed to the effects functions
+    vnode.bag = {};
+    // a place to keep track of all the effect results
+    vnode.effects = {};
+    // an event emitter for handling updates
+    vnode.update = new EventEmitter();
+    // a place to keep event listener ids
+    vnode.listeners = {};
+  }
+};
+
+// stateful components
+export const statefulModule = {
+  create(vnode) {
+    if (vnode.data.stateful) {
+      vnode.bag.state = vnode.data.stateful.init();
+      vnode.bag.actions = {};
+      Object.keys(vnode.data.stateful.actions || {}).forEach(key => {
+        vnode.bag.actions = (...args) => {
+          vnode.bag.state = vnode.data.stateful.actions[key](
+            vnode.bag.state,
+            ...args
+          );
+          vnode.update.emit();
+        };
+      });
+    }
+  },
+  update(oldVnode, vnode) {
+    if (oldVnode.elm.tagName === vnode.elm.tagName) {
+      if (oldVnode.stateful && vnode.stateful) {
+        vnode.bag.state = oldVnode.bag.state;
+      }
+    }
+  }
+};
+
+export const viewEffectModule = patchView => {
+  return {
+    create(vnode) {
+      if (vnode.data.view) {
+        const childViews = (vnode.children || []).map(vn => vn.effects.view);
+        vnode.effects.view = vnode.data.view(vnode.bag, childViews);
+        vnode.listeners.view = vnode.update.subscribe(() => {
+          const oldView = vnode.effects.view;
+          const childViews = (vnode.children || []).map(vn => vn.effects.view);
+          const nextView = vnode.data.view(vnode.bag, childViews);
+          vnode.effects.view = nextView;
+          patchView(oldView, nextView);
+        });
+      }
+    },
+    destroy(vnode) {
+      if (vnode.data.view) {
+        vnode.update.stop(vnode.listeners.view);
+      }
+    }
+  };
 };
