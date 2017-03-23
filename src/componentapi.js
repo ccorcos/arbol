@@ -180,25 +180,46 @@ export const statefulModule = {
   }
 };
 
-export const viewEffectModule = patchView => {
+export const effectModule = (effectName, patchEffect) => {
   return {
     create(vnode) {
-      if (vnode.data.view) {
-        const childViews = (vnode.children || []).map(vn => vn.effects.view);
-        vnode.effects.view = vnode.data.view(vnode.bag, childViews);
-        vnode.listeners.view = vnode.update.subscribe(() => {
-          const oldView = vnode.effects.view;
-          const childViews = (vnode.children || []).map(vn => vn.effects.view);
-          const nextView = vnode.data.view(vnode.bag, childViews);
-          vnode.effects.view = nextView;
-          patchView(oldView, nextView);
+      if (vnode.data[effectName]) {
+        const childViews = (vnode.children || [])
+          .map(vn => vn.effects[effectName]);
+        vnode.effects[effectName] = vnode.data[effectName](
+          vnode.bag,
+          childViews
+        );
+        vnode.listeners[effectName] = vnode.update.subscribe(() => {
+          const oldEffect = vnode.effects[effectName];
+          const childEffects = (vnode.children || [])
+            .map(vn => vn.effects[effectName]);
+          const nextEffect = vnode.data[effectName](vnode.bag, childEffects);
+          vnode.effects[effectName] = nextEffect;
+          patchEffect(oldEffect, nextEffect);
         });
       }
     },
     destroy(vnode) {
-      if (vnode.data.view) {
-        vnode.update.stop(vnode.listeners.view);
+      if (vnode.data[effectName]) {
+        vnode.update.stop(vnode.listeners[effectName]);
       }
     }
   };
+};
+
+export const fetchModule = {
+  create(vnode) {
+    vnode.success = (...args) => vnode.data.success(...args);
+    vnode.failure = (...args) => vnode.data.failure(...args);
+    fetch(vnode.elm.tagName).then(vnode.success).catch(vnode.failure);
+  },
+  update(oldVNode, vnode) {
+    oldVNode.success = (...args) => vnode.data.success(...args);
+    oldVNode.failure = (...args) => vnode.data.failure(...args);
+  },
+  destroy(vnode) {
+    oldvnodeVNode.success = () => {};
+    oldVNode.failure = () => {};
+  }
 };

@@ -8,7 +8,8 @@ import componentApi, {
   ComponentElement,
   componentModule,
   statefulModule,
-  viewEffectModule
+  effectModule,
+  fetchModule
 } from "./componentapi";
 
 const patchView = snabbdom.init([
@@ -18,8 +19,15 @@ const patchView = snabbdom.init([
   eventModule
 ]);
 
+const patchFetch = snabbdom.init([fetchModule]);
+
 const patchComponent = snabbdom.init(
-  [componentModule, statefulModule, viewEffectModule(patchView)],
+  [
+    componentModule,
+    statefulModule,
+    effectModule("view", patchView),
+    effectModule("fetch", patchFetch)
+  ],
   componentApi
 );
 
@@ -37,6 +45,7 @@ const Counter = h("counter", {
       h("span", state.toString()),
       h("button", { on: { click: actions.inc } }, "+")
     ]),
+  // we can implement a hotkeys effect module later
   keys: ({ state, actions }, children) =>
     h("", {
       "=": actions.inc,
