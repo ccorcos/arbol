@@ -1,17 +1,19 @@
 import snabbdom from "snabbdom";
 import KeymasterElement from "./element";
-import mutableApi from "../core/mutableapi";
+import mutableApi from "../../core/mutableapi";
 import keymaster from "keymaster";
+
+keymaster.setScope("all");
 
 const core = {
   create(emptyVNode, vnode) {
     Object.keys(vnode.data).forEach(key => {
       const handler = () => {
-        handler.vnode.data[key]();
+        handler.vnode && handler.vnode.data[key]();
       };
       handler.vnode = vnode;
       vnode.elm.handlers[key] = handler;
-      keymaster(key, vnode.elm.scope, handler);
+      keymaster(key, handler);
     });
   },
   update(oldVnode, vnode) {
@@ -24,20 +26,20 @@ const core = {
         };
         handler.vnode = vnode;
         vnode.elm.handlers[key] = handler;
-        keymaster(key, vnode.elm.scope, handler);
+        keymaster(key, handler);
       }
     });
     Object.keys(vnode.elm.handlers).forEach(key => {
       if (!(key in vnode.data)) {
-        delete vnode.elm.handlers[key];
-        keymaster.unbind(key, vnode.elm.scope);
+        // we can't actually unbind these handlers so we'll just noop them
+        delete vnode.elm.handlers[key].vnode;
       }
     });
   },
   destroy(vnode) {
+    // we can't actually unbind these handlers so we'll just noop them
     Object.keys(vnode.elm.handlers).forEach(key => {
-      delete vnode.elm.handlers[key];
-      keymaster.unbind(key, vnode.elm.scope);
+      delete vnode.elm.handlers[key].vnode;
     });
   }
 };

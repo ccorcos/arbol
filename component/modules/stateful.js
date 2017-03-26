@@ -2,7 +2,7 @@ const createHandler = name => {
   const handler = (...args) => {
     const vnode = handler.vnode;
     const bag = vnode.elm.bag;
-    const actions = vnode.data.stateful;
+    const actions = vnode.data.stateful.actions;
     bag.state = actions[name](bag.state, ...args);
     vnode.elm.update();
   };
