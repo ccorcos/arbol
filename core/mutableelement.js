@@ -1,4 +1,4 @@
-// This is class represents an HTML DOM node and is supposed to hold all of the mutable state. VNodes have a .elm property that references a type like this and gets passed on from one VNode to the next.
+// This is class represents an HTML DOM node and is supposed to hold all of the mutable state. VNodes have a .elm property that references a class like this and gets passed on from one VNode to the next.
 
 export default class MutableElement {
   constructor(tagName) {
@@ -10,7 +10,11 @@ export default class MutableElement {
   insertBefore(newNode, referenceNode) {
     newNode.parentNode = this;
     newNode.nextSibling = referenceNode;
-    this.children.splice(this.children.indexOf(referenceNode), 0, newNode);
+    if (referenceNode === null) {
+      this.children.push(newNode);
+    } else {
+      this.children.splice(this.children.indexOf(referenceNode), 0, newNode);
+    }
   }
   removeChild(child) {
     child.parentNode = undefined;
