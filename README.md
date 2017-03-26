@@ -1,11 +1,16 @@
 # Visual
 
 ## To Do
-- read the herel statecharts paper: http://www.inf.ed.ac.uk/teaching/courses/seoc/2005_2006/resources/statecharts.pdf
-
-- snabbdom combinators for components for TEA
-- whoa. parser combinators over a stream?
-- look up SVG drawing applications
+- examples
+  - coupled counters
+  - listOf combinator
+  - undoable component
+  - global pub/sub module
+- tests
+  - change the state machine of a component
+  - add and remove actions
+- harel
+  - look up SVG drawing applications
 
 ## Example Scenarios
 

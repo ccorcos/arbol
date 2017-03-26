@@ -11,7 +11,7 @@ export default (name, patch) => {
           elm[name].props = props;
           const children = (vnode.children || [])
             .map(child => child.elm[name].effect);
-          const result = vnode.data[name](props)(elm.bag, children);
+          const result = vnode.data[name](props)({ ...elm.bag, children });
           elm[name].result = result;
           return result;
         };
