@@ -1,5 +1,5 @@
 import h from "snabbdom/h";
-import DeltaCounter from "../delta-counter/delta-counter";
+import DeltaCounter from "./delta-counter";
 
 export default () =>
   h(

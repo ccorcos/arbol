@@ -5,7 +5,7 @@ module.exports = {
   cache: true,
   devtool: "source-map",
   entry: {
-    index: path.join(__dirname, "src/index.js")
+    index: path.join(__dirname, "examples/index.js")
   },
   resolve: {
     extensions: [".js", ".ts", ".tsx"]
@@ -47,7 +47,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: path.join(__dirname, "src/index.html")
+      template: path.join(__dirname, "examples/index.html")
     })
   ]
 };
