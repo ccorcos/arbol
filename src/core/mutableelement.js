@@ -14,12 +14,12 @@ export default class MutableElement {
   }
   removeChild(child) {
     child.parentNode = undefined;
-    newNode.nextSibling = undefined;
+    child.nextSibling = undefined;
     this.children.splice(this.children.indexOf(child), 1);
   }
   appendChild(child) {
     child.parentNode = this;
-    newNode.nextSibling = undefined;
+    child.nextSibling = undefined;
     this.children.push(child);
   }
 }
