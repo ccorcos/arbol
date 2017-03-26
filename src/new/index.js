@@ -1,14 +1,6 @@
 import h from "snabbdom/h";
-import snabbdom from "snabbdom";
-import ComponentElement from "./componentelement";
-import mutableApi from "./mutableapi";
-import stateful from "./modules/stateful";
-import effect from "./modules/effect";
-import view from "./effects/snabbdom";
-
-const componentApi = mutableApi(ComponentElement);
-
-const patch = snabbdom.init([stateful, effect("view", view)], componentApi);
+import patchc from "./patch/component";
+import patchv from "./patch/view";
 
 const Counter = h("counter", {
   stateful: {
@@ -33,12 +25,10 @@ const Counter = h("counter", {
     })
 });
 
-const elm = new ComponentElement("");
-const vnode = patch(elm, Counter);
-
+const vnode = patchc(Counter);
 const root = document.createElement("div");
 document.body.appendChild(root);
-view(root, vnode.elm.view.effect());
+patchv(root, vnode.elm.view.effect());
 
 // const TwoCounters = h("TwoCounters", [
 //   thunk(Counter, { decBy: 2 }),

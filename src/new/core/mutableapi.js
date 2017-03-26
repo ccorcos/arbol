@@ -3,10 +3,10 @@ function error() {
 }
 
 // Create something that mocks out the htmlDomApi that Snabbdom accepts as a second argument to init. This requires some MutableElement-like object.
-export default MutableElementLike => {
+export default MutableElement => {
   // function createElement(tagName: any): HTMLElement
   function createElement(tagName) {
-    return new MutableElementLike(tagName);
+    return new MutableElement(tagName);
   }
 
   // function createElementNS(namespaceURI: string, qualifiedName: string): Element
