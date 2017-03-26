@@ -1,36 +1,37 @@
-# Visual
+# Arbol
 
-## To Do
-- examples
-  - coupled counters
-  - listOf combinator
-  - undoable component
-  - global pub/sub module
-- tests
-  - change the state machine of a component
-  - add and remove actions
-- harel
-  - look up SVG drawing applications
+Arbol is an architecture for writing unapologetically declarative code.
 
-## Example Scenarios
+It's based on an insight that rendering to the DOM is an asynchronous side-effect that's fundamentally no different from an HTTP request, a WebSocket subscription, or a key event listener.
 
-- login / signup flow
-- instagram / twitter
-- drawing application
+Declarative rendering libraries like React, Virtual DOM, and Snabbdom work by computing the difference between two lazy trees that are a declarative representation of the DOM. So let's use this same approach for all of our side-effects.
 
-## Notes
+Arbol is just thin layer on top of Snabbdom which takes care of all the tree diffing letting you focus on building declarative services.
 
-- remember history at one level or all the way down with an H or H* node
+So where do I start? Let's start by defining a basic counter component.
 
-- emanate -- good word
+```js
+import h from "snabbdom/h";
 
+const Counter = () =>
+  h("counter", {
+    stateful: {
+      init: () => 0,
+      actions: {
+        inc: (state, event) => state + 1,
+        dec: (state, event) => state - 1
+      }
+    },
+    view: props =>
+      ({ state, actions }) =>
+        h("div", [
+          h("button", { on: { click: actions.dec } }, "-"),
+          h("span", state.toString()),
+          h("button", { on: { click: actions.inc } }, "+")
+        ]),
+  });
+```
 
-- enter node
-- enter node H
-- enter child child
-- default node entrance
-- action splice AND vs OR into 1 -- no need, all about positioning
+You'll notice that we used the same `h` for the view function as well as the counter component itself. That's because components themselves are structures inside a lazy tree!
 
-
-
-- clear history special actions
+Man, this is really hard to explain. I'll stop here for now...

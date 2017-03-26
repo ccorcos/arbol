@@ -1,6 +1,6 @@
 {
-  "name": "visual",
-  "version": "1.0.0",
+  "name": "arbol",
+  "version": "0.0.1",
   "description": "",
   "scripts": {
     "start": "webpack-dev-server --content-base dist",
@@ -12,11 +12,7 @@
   "author": "Chet Corcos <ccorcos@gmail.com> (http://www.chetcorcos.com/)",
   "license": "ISC",
   "dependencies": {
-    "flyd": "^0.2.4",
-    "glamor": "^2.20.24",
     "keymaster": "^1.6.2",
-    "react": "^15.4.2",
-    "react-dom": "^15.4.2",
     "snabbdom": "^0.6.7"
   },
   "devDependencies": {
