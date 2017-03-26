@@ -10,14 +10,18 @@ import styleModule from "snabbdom/modules/style";
 import eventModule from "snabbdom/modules/eventlisteners";
 // keys / keymaster
 import initk from "../effects/keymaster/init";
+// fetch / http
+import initf from "../effects/fetch/init";
 
 // create the patch functions
 const patchv = initv([classModule, propsModule, styleModule, eventModule]);
 const patchk = initk();
+const patchf = initf();
 const patchc = initc([
   statefulModule,
   effectModule("view", patchv),
-  effectModule("keys", patchk)
+  effectModule("keys", patchk),
+  effectModule("fetch", patchf)
 ]);
 
 // start everything up
@@ -27,6 +31,7 @@ const start = (cnode, props) => {
   vnode = patchv(vnode);
   document.body.appendChild(vnode.elm);
   patchk(cnode.elm.effects.keys.handler(props));
+  patchf(cnode.elm.effects.fetch.handler(props));
 };
 
 export default start;
