@@ -1,6 +1,7 @@
 import h from "snabbdom/h";
 import patchc from "./patch/component";
 import patchv from "./patch/view";
+import patchk from "./patch/keys";
 
 const Counter = h("counter", {
   stateful: {
@@ -18,11 +19,12 @@ const Counter = h("counter", {
         h("button", { on: { click: actions.inc } }, "+")
       ]),
   // we can implement a hotkeys effect module later
-  keys: ({ state, actions }, children) =>
-    h("", {
-      "=": actions.inc,
-      "-": actions.dec
-    })
+  keys: props =>
+    ({ state, actions }, children) =>
+      h("boobs", {
+        "=": actions.inc,
+        "-": actions.dec
+      })
 });
 
 const vnode = patchc(Counter);
@@ -30,6 +32,7 @@ const root = document.createElement("div");
 document.body.appendChild(root);
 patchv(root, vnode.elm.view.effect());
 
+patchk(vnode.elm.keys.effect());
 // const TwoCounters = h("TwoCounters", [
 //   thunk(Counter, { decBy: 2 }),
 //   thunk(Counter, { decBy: 2 })
