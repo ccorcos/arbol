@@ -3,10 +3,7 @@
   "version": "0.0.1",
   "description": "",
   "scripts": {
-    "start": "webpack-dev-server --content-base dist",
-    "build": "webpack -p",
-    "deploy": "git add -f dist && git commit -m 'deploy' && git push origin `git subtree split --prefix dist master`:gh-pages --force && git rm -r dist && git commit -m 'cleanup deploy'",
-    "release": "npm run build && npm run deploy"
+    "start": "cd examples && webpack-dev-server --content-base dist"
   },
   "keywords": [],
   "author": "Chet Corcos <ccorcos@gmail.com> (http://www.chetcorcos.com/)",

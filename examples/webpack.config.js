@@ -5,7 +5,7 @@ module.exports = {
   cache: true,
   devtool: "source-map",
   entry: {
-    index: path.join(__dirname, "examples/index.js")
+    index: path.join(__dirname, "index.js")
   },
   output: {
     path: path.join(__dirname, "dist"),
@@ -29,7 +29,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: path.join(__dirname, "examples/index.html")
+      template: path.join(__dirname, "index.html")
     })
   ]
 };
