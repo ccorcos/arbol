@@ -1,4 +1,10 @@
-- fetch service
-- weather example
-- drag and drop state machine
+- wire effects through children unless specified
+- thunk at each child
+- single atom state
+- custom patch functions
+- combinators
+  - undoable
+  - listOf
+  - publish / subscribe
+- type definitions
 - documentation
